@@ -1,11 +1,15 @@
-# Start your own "Can of Books" App
+# LAB - Number
 
-This repository has starter code to begin work on creating your own online bookshelf.
+## Project Name
 
-## What can books do?
+I build an app with a direct and powerful purpose. It does all of the things that it accomplishes well. I should describe the purpose and functionality so those that visit my README understand the app
 
-Books are life-changing. They have the power to enlighten, educate, entertain, heal, and help us grow. Build out this code base to create an web app to track what books have impacted you, and what's recommended to read next.
+### Author: Student/Group Name
 
-## Use this template
+### Links and Resources
+* [submission PR](http://xyz.com)
+* Any Links you used as reference
 
-Clone this repo to your own account with the green "Use this template" button. Then, add any collaborators. Now you are ready to start adding features! Deploy your site to let the world know which books have had the greatest impact on you, and what's recommended. Enjoy!
+### Reflections and Comments
+* Consider including the answers to your daily journal and submission questions here
+* This is also a good place to reflect on the tools and resources used and learned

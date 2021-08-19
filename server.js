@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
 const mongoose = require('mongoose');
 const BookModel = require('./modules/books.js');
+const seedBooks = require('./modules/seed');
 const { response } = require('express');
 const app = express();
 
@@ -27,29 +28,10 @@ function getKey(header, callback) {
 async function addBook(obj) {
   return await BookModel(obj).save();
 }
-async function seedBooks() {
-  console.log(await addBook({
-    title: "Tobin's Spirit Guide",
-    description: "Ghostbuster Reference Manual for all paranormal entities",
-    status: "In Circulation",
-    email: "jp.jones@codefellows.com"
-  }));
-  await addBook({
-    title: "Spates Catalog",
-    description: "Ghostbuster Reference Manual for all occult information",
-    status: "Not in circulation",
-    email: "ryan@codefellows.com"
-  });
-  await addBook({
-    title: "New Recruit Ghostbusting Handbook",
-    description: "Doctrine for Ghostbusting Employees",
-    status: "LIMDIS",
-    email: "jp.jones@codefellows.com"
-  });
-}
-async function clearDbase() {
+
+function clearDbase() {
   try {
-    await BookModel.deleteMany({});
+    BookModel.deleteMany({});
     console.log('Bombed the dBase');
   }
   catch (err) {
@@ -77,30 +59,42 @@ app.get('/test', async (request, response) => {
   // STEP 3: to prove that everything is working correctly, send the opened jwt back to the front-end  
 
 })
+app.get('/allBooks', (req, res) => {
+  console.log('Getting All Books');
+  BookModel.find({}, (err, books) => {
+
+    if (err) return res.status(500).send('error in find operations', err);
+    res.status(200).send(books);
+  })
+});
 app.get('/books', async (req, res) => {
-  let books = BookModel.find({});
-  console.log('books:', books);
-  res.send(books);
-  // const token = req.headers.authorization.split(' ')[1];
-  // ///
-  // jwt.verify(token, getKey, {}, function (err, user) {
-  //   if (err) {
-  //     console.log('invalid token');
-  //     response.send('invalid token');
-  //   }
-  //   else {
-  //     console.log('reqemail:', req.query.email);
-  //     console.log('user:', user);
-  //     const email = user.email;
-  //     BookModel.find({ email }, (err, books) => {
-  //       if (err) return console.error(err);
-  //       res.status(200).send(books);
-  //     });
+
+  const token = req.headers.authorization.split(' ')[1];
+  ///
+  jwt.verify(token, getKey, {}, function (err, user) {
+    if (err) {
+      console.log('invalid token');
+      response.send('invalid token');
+    }
+    else {
+      let email;
+      if (req.query.email) email = req.query.email;
+      //Could use the user obj from auth for email (more ADV for students)
+      //console.log('user:', user);
+      else {
+        console.log('No email query provided.  Using Auth User email');
+        email = user.email;
+      }
+      console.log('email:', email);
 
 
-  //response.send(user);
-  // }
-  // });
+      //
+      BookModel.find({ email }, (err, books) => {
+        if (err) return res.status(500).send('error in find operations', err);
+        res.status(200).send(books);
+      });
+    }
+  });
 });
 
 app.get('/seed', async (req, res) => await seedBooks());

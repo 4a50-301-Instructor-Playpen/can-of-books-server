@@ -78,26 +78,29 @@ app.get('/test', async (request, response) => {
 
 })
 app.get('/books', async (req, res) => {
-  const token = req.headers.authorization.split(' ')[1];
-  ///
-  jwt.verify(token, getKey, {}, function (err, user) {
-    if (err) {
-      console.log('invalid token');
-      response.send('invalid token');
-    }
-    else {
-      console.log('reqemail:', req.query.email);
-      console.log('user:', user);
-      const email = user.email;
-      BookModel.find({ email }, (err, books) => {
-        if (err) return console.error(err);
-        res.status(200).send(books);
-      });
+  let books = BookModel.find({});
+  console.log('books:', books);
+  res.send(books);
+  // const token = req.headers.authorization.split(' ')[1];
+  // ///
+  // jwt.verify(token, getKey, {}, function (err, user) {
+  //   if (err) {
+  //     console.log('invalid token');
+  //     response.send('invalid token');
+  //   }
+  //   else {
+  //     console.log('reqemail:', req.query.email);
+  //     console.log('user:', user);
+  //     const email = user.email;
+  //     BookModel.find({ email }, (err, books) => {
+  //       if (err) return console.error(err);
+  //       res.status(200).send(books);
+  //     });
 
 
-      //response.send(user);
-    }
-  });
+  //response.send(user);
+  // }
+  // });
 });
 
 app.get('/seed', async (req, res) => await seedBooks());
@@ -125,4 +128,4 @@ mongoose.connect(process.env.MONGODB_URI,
 
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
-clearDbase();
+//clearDbase();

@@ -98,24 +98,46 @@ app.get('/books', async (req, res) => {
 });
 
 app.get('/seed', async (req, res) => await seedBooks());
-
+//Solution Code Way to connect to the database
 mongoose.connect(process.env.MONGODB_URI,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true
-  }
-)
-  .then(console.log('Connection to DB Successful'))
-  .then(async () => {
-    console.log('Checking for Seed');
-    let books = await BookModel.find({});
-    if (books.length === 0) {
-      console.log('Seeding book document');
-      await seedBooks();
-    } else {
-      console.log('No Seeding Required');
-    }
   });
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', _ => {
+  console.log('We\'re Connected to the Database!');
+  console.log('Checking to Seed');
+  let books = BookModel.find({});
+  if (books.length === 0) {
+    console.log('No entries found.  Seeding the Database');
+    seedBooks();
+  }
+  else { console.log('Seeding not required') }
+});
+
+
+//
+
+//Jacob way
+// mongoose.connect(process.env.MONGODB_URI,
+//   {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true
+//   }
+// )
+//   .then(console.log('Connection to DB Successful'))
+//   .then(async () => {
+//     console.log('Checking for Seed');
+//     let books = await BookModel.find({});
+//     if (books.length === 0) {
+//       console.log('Seeding book document');
+//       await seedBooks();
+//     } else {
+//       console.log('No Seeding Required');
+//     }
+//   });
 
 
 

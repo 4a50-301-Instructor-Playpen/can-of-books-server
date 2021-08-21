@@ -28,7 +28,6 @@ function getKey(header, callback) {
 async function addBook(obj) {
   return await BookModel(obj).save();
 }
-
 function clearDbase() {
   try {
     BookModel.deleteMany({});
@@ -87,8 +86,6 @@ app.get('/books', async (req, res) => {
       }
       console.log('email:', email);
 
-
-      //
       BookModel.find({ email }, (err, books) => {
         if (err) return res.status(500).send('error in find operations', err);
         res.status(200).send(books);
@@ -96,31 +93,38 @@ app.get('/books', async (req, res) => {
     }
   });
 });
-
+app.post('/books', postBooksHandler);
 app.get('/seed', async (req, res) => await seedBooks());
+app.delete('/books', deleteBooksHandler);
+function deleteBooksHandler(req, res) {
+  res.status(200).send('I will delete something!');
+}
+function postBooksHandler(req, res) {
+
+  console.log('Add a book from Post');
+  res.status(200).send('Return the post');
+}
 //Solution Code Way to connect to the database
-mongoose.connect(process.env.MONGODB_URI,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  });
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', _ => {
-  console.log('We\'re Connected to the Database!');
-  console.log('Checking to Seed');
-  let books = BookModel.find({});
-  if (books.length === 0) {
-    console.log('No entries found.  Seeding the Database');
-    seedBooks();
-  }
-  else { console.log('Seeding not required') }
-});
-
-
+// mongoose.connect(process.env.MONGODB_URI,
+//   {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true
+//   });
+// const db = mongoose.connection;
+// db.on('error', console.error.bind(console, 'connection error:'));
+// db.once('open', _ => {
+//   console.log('We\'re Connected to the Database!');
+//   console.log('Checking to Seed');
+//   let books = BookModel.find({});
+//   if (books.length === 0) {
+//     console.log('No entries found.  Seeding the Database');
+//     seedBooks();
+//   }
+//   else { console.log('Seeding not required') }
+// });
 //
 
-//Jacob way
+//Jacob way to connect to the Database
 // mongoose.connect(process.env.MONGODB_URI,
 //   {
 //     useNewUrlParser: true,
@@ -138,10 +142,6 @@ db.once('open', _ => {
 //       console.log('No Seeding Required');
 //     }
 //   });
-
-
-
-
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
 //clearDbase();

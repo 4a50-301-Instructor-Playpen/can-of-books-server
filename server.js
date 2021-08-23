@@ -44,8 +44,8 @@ app.get('/allBooks', (req, res) => {
 });
 app.get('/books', bookRoutes.allBooks);
 app.post('/books', bookRoutes.postBooks);
-app.get('/seed', async (req, res) => await seedBooks());
 app.delete('/books/:id', bookRoutes.deleteBooks);
+app.get('/seed', async (req, res) => await seedBooks());
 
 //Solution Code Way to connect to the database
 //#region mongoose connections

@@ -71,10 +71,19 @@ function postBooks(req, res) {
   // res.status(200).send(`Save Book:${newBook.title}`);
 }
 async function deleteBooks(req, res) {
-  console.log(req.params);
+  console.log('params:', req.params);
+  console.log('query:', req.query);
+  let { email } = req.query;
+
   let myId = req.params.id;
-  await BookModel.findByIdAndDelete(myId);
-  res.send('Deleted Book');
+  let requestedBook = await BookModel.findById(myId);
+  if (requestedBook.email.toUpperCase() === email.toUpperCase()) {
+    await BookModel.deleteOne(requestedBook);
+    res.send('Deleted Book');
+  }
+  else {
+    res.status(400).send('Request Book Does Not exist/Invalid email provided');
+  }
 
 }
 module.exports = { allBooks, postBooks, deleteBooks }

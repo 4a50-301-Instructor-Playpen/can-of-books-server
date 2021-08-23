@@ -7,23 +7,13 @@ const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
 const mongoose = require('mongoose');
 const BookModel = require('./modules/books.js');
+const bookRoutes = require('./modules/bookHandlers');
 const seedBooks = require('./modules/seed');
-const { response } = require('express');
 const app = express();
-
+//Lab 13
+app.use(express.json());
 const PORT = process.env.PORT || 3001;
-
-const client = jwksClient({
-  jwksUri: 'https://dev-kqrep13d.us.auth0.com/.well-known/jwks.json'
-});
 app.use(cors());
-
-function getKey(header, callback) {
-  client.getSigningKey(header.kid, function (err, key) {
-    const signingKey = key.publicKey || key.rsaPublicKey;
-    callback(null, signingKey);
-  });
-}
 
 async function addBook(obj) {
   return await BookModel(obj).save();
@@ -37,27 +27,12 @@ function clearDbase() {
     console.log('Unable to Clear Document');
   }
 }
-app.get('/test', async (request, response) => {
-  // TODO: 
-  // STEP 1: get the jwt from the headers
-  const token = request.headers.authorization.split(' ')[1];
-  // STEP 2. use the jsonwebtoken library to verify that it is a valid jwt
+app.get('/test', (request, response) => {
+  console.log('Test \'GET\' route complete!');
+  response.send('Test Complete.  Regard all further alarms');
 
-  jwt.verify(token, getKey, {}, function (err, user) {
-    if (err) {
-      console.log('invalid token');
-      response.send('invalid token');
-    }
-    else {//console.log('user:', user, token);
-      //
-      console.log('user:', user);
-      response.send(user);
-    }
-  });
-  // jsonwebtoken dock - https://www.npmjs.com/package/jsonwebtoken
-  // STEP 3: to prove that everything is working correctly, send the opened jwt back to the front-end  
+});
 
-})
 app.get('/allBooks', (req, res) => {
   console.log('Getting All Books');
   BookModel.find({}, (err, books) => {
@@ -65,65 +40,34 @@ app.get('/allBooks', (req, res) => {
     if (err) return res.status(500).send('error in find operations', err);
     res.status(200).send(books);
   })
-});
-app.get('/books', async (req, res) => {
 
-  const token = req.headers.authorization.split(' ')[1];
-  ///
-  jwt.verify(token, getKey, {}, function (err, user) {
-    if (err) {
-      console.log('invalid token');
-      response.send('invalid token');
-    }
-    else {
-      let email;
-      if (req.query.email) email = req.query.email;
-      //Could use the user obj from auth for email (more ADV for students)
-      //console.log('user:', user);
-      else {
-        console.log('No email query provided.  Using Auth User email');
-        email = user.email;
-      }
-      console.log('email:', email);
-
-      BookModel.find({ email }, (err, books) => {
-        if (err) return res.status(500).send('error in find operations', err);
-        res.status(200).send(books);
-      });
-    }
-  });
 });
-app.post('/books', postBooksHandler);
+app.get('/books', bookRoutes.allBooks);
+app.post('/books', bookRoutes.postBooks);
 app.get('/seed', async (req, res) => await seedBooks());
-app.delete('/books', deleteBooksHandler);
-function deleteBooksHandler(req, res) {
-  res.status(200).send('I will delete something!');
-}
-function postBooksHandler(req, res) {
+app.delete('/books/:id', bookRoutes.deleteBooks);
 
-  console.log('Add a book from Post');
-  res.status(200).send('Return the post');
-}
 //Solution Code Way to connect to the database
-// mongoose.connect(process.env.MONGODB_URI,
-//   {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true
-//   });
-// const db = mongoose.connection;
-// db.on('error', console.error.bind(console, 'connection error:'));
-// db.once('open', _ => {
-//   console.log('We\'re Connected to the Database!');
-//   console.log('Checking to Seed');
-//   let books = BookModel.find({});
-//   if (books.length === 0) {
-//     console.log('No entries found.  Seeding the Database');
-//     seedBooks();
-//   }
-//   else { console.log('Seeding not required') }
-// });
-//
-
+//#region mongoose connections
+mongoose.connect(process.env.MONGODB_URI,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  });
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', _ => {
+  console.log('We\'re Connected to the Database!');
+});
+// console.log('Checking to Seed');
+// let books = BookModel.find({});
+// if (books.length === 0) {
+//   console.log('No entries found.  Seeding the Database');
+//   seedBooks();
+// }
+// else { console.log('Seeding not required') }
+//#endregion
+//#region Jacob's way mongoose connections 
 //Jacob way to connect to the Database
 // mongoose.connect(process.env.MONGODB_URI,
 //   {
@@ -142,6 +86,6 @@ function postBooksHandler(req, res) {
 //       console.log('No Seeding Required');
 //     }
 //   });
-
+//#endregion
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
 //clearDbase();

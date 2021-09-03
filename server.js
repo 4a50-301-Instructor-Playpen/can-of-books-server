@@ -45,7 +45,10 @@ app.get('/allBooks', (req, res) => {
 app.get('/books', bookRoutes.allBooks);
 app.post('/books', bookRoutes.postBooks);
 app.delete('/books/:id', bookRoutes.deleteBooks);
-app.get('/seed', async (req, res) => await seedBooks());
+app.get('/seed', async (req, res) => {
+  await seedBooks();
+  res.status(200).send('Database seeded');
+});
 
 //Solution Code Way to connect to the database
 //#region mongoose connections

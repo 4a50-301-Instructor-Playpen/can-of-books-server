@@ -79,7 +79,7 @@ async function deleteBooks(req, res) {
   let requestedBook = await BookModel.findById(myId);
   if (requestedBook.email.toUpperCase() === email.toUpperCase()) {
     await BookModel.deleteOne(requestedBook);
-    res.send('Deleted Book');
+    res.status(200).send(requestedBook);
   }
   else {
     res.status(400).send('Request Book Does Not exist/Invalid email provided');
